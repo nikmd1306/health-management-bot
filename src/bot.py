@@ -3,6 +3,7 @@ import logging
 from aiogram import Bot, Dispatcher
 from src.config import config
 from src.logging_config import setup_logging
+from src.database import init_db, close_db
 
 
 async def main():
@@ -19,10 +20,12 @@ async def main():
     # dp.include_router(...)
 
     try:
+        await init_db()
         await dp.start_polling(bot)
     except Exception as e:
         logger.error(f"Error occurred: {e}")
     finally:
+        await close_db()
         await bot.session.close()
         logger.info("Bot stopped")
 
