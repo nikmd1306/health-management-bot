@@ -1,17 +1,26 @@
 from aiogram import Router
 from aiogram.filters import CommandStart, Command
 from aiogram.types import Message
+from aiogram.fsm.context import FSMContext
+
 from src.keyboards.main_menu import get_main_menu
 from src.database.models import User
+from src.handlers.onboarding import start_onboarding
 
 router = Router()
 
 
 @router.message(CommandStart())
-async def cmd_start(message: Message, user: User):
+async def cmd_start(message: Message, user: User, state: FSMContext):
     """
     Handler for /start command.
     """
+    # AICODE-NOTE: Используем поле age как маркер того, что пользователь новый.
+    # AICODE-TODO: В будущем добавить явное поле is_onboarded в модель User.
+    if user.age is None:
+        await start_onboarding(message, state)
+        return
+
     welcome_text = (
         f"Привет, {user.full_name or message.from_user.first_name}!\n\n"
         "Я — твой медицинский ассистент. "
